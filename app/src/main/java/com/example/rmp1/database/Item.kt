@@ -1,8 +1,8 @@
 package com.example.rmp1.database
 
-data class Object(
+data class Item(
     var id: Long,
     var categoryId: Long,
-    var objectName: String,
+    var itemName: String,
 
 )

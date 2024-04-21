@@ -12,7 +12,7 @@ class DbHelper(context: Context) :
         const val DB_NAME = "RMP"
         const val TBL_CATEGORY = "category"
         const val TBL_FIELDS = "fields"
-        const val TBL_OBJECT = "objects"
+        const val TBL_ITEMS = "items"
         const val TBL_VALUES = "tbl_values"
     }
 
@@ -30,21 +30,21 @@ class DbHelper(context: Context) :
                     db.execSQL(
                         "CREATE TABLE $TBL_FIELDS (" +
                                 "id          INTEGER PRIMARY KEY UNIQUE NOT NULL," +
-                                "category_id INTEGER REFERENCES category (id) NOT NULL," +
+                                "category_id INTEGER REFERENCES $TBL_CATEGORY (id) NOT NULL," +
                                 "field_name  TEXT    NOT NULL );"
 
                     )
                     db.execSQL(
-                        "CREATE TABLE $TBL_OBJECT (" +
+                        "CREATE TABLE $TBL_ITEMS (" +
                                 "id          INTEGER PRIMARY KEY UNIQUE NOT NULL," +
-                                "category_id INTEGER REFERENCES category (id) NOT NULL," +
-                                "object_name        INTEGER NOT NULL );"
+                                "category_id INTEGER REFERENCES $TBL_CATEGORY (id) NOT NULL," +
+                                "item_name        INTEGER NOT NULL );"
                     )
                     db.execSQL(
                         "CREATE TABLE $TBL_VALUES (" +
                                 "id        INTEGER PRIMARY KEY UNIQUE NOT NULL," +
-                                " object_id INTEGER REFERENCES object (id) NOT NULL," +
-                                "field_id  INTEGER REFERENCES category_fields (id) NOT NULL," +
+                                " object_id INTEGER REFERENCES $TBL_ITEMS (id) NOT NULL," +
+                                "field_id  INTEGER REFERENCES $TBL_FIELDS (id) NOT NULL," +
                                 "value     TEXT    NOT NULL );"
                     )
                     addCategory("TEST", db)
@@ -52,9 +52,26 @@ class DbHelper(context: Context) :
                 } finally {
                     db.endTransaction()
                 }
-                addCategory("Рубль", db)
             } catch (e: Throwable) {
                 Log.e("DB_ERROR", e.message.toString())
+            }
+        }
+    }
+
+    fun addItem(itemName: String, categoryId: Long, database: SQLiteDatabase? = null) {
+        with(database ?: writableDatabase) {
+            beginTransaction()
+            val values = ContentValues()
+            values.put("category_id", categoryId)
+            values.put("item_name", itemName)
+            try {
+                insert(
+                    TBL_ITEMS, "", values
+                )
+                setTransactionSuccessful()
+            } catch (_: Throwable) {
+            } finally {
+                endTransaction()
             }
         }
     }
@@ -110,6 +127,43 @@ class DbHelper(context: Context) :
             }
         }
     }
+
+    fun getItemsByCategory(categoryName: String): List<Item> {
+        val items = mutableListOf<Item>()
+        with(readableDatabase) {
+            beginTransaction()
+            try {
+                query(
+                    TBL_ITEMS,
+                    arrayOf("id", "category_id", "object_name"),
+                    "category_name = ?",
+                    arrayOf(categoryName),
+                    null,
+                    null,
+                    null
+                ).apply {
+                    while (moveToNext()) {
+                        items.add(
+                            Item(
+                                getLong(0),
+                                getLong(1),
+                                getString(2)
+                            )
+                        )
+                    }
+                    close()
+                }
+                setTransactionSuccessful()
+                return items
+            } catch (_: Throwable) {
+                items.clear()
+                return items
+            } finally {
+                endTransaction()
+            }
+        }
+    }
+
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         TODO("Not yet implemented")
