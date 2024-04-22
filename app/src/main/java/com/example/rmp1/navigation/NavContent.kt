@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import com.example.rmp1.database.entity.Category
 import com.example.rmp1.database.entity.Field
 import com.example.rmp1.database.entity.Item
+import com.example.rmp1.database.entity.Value
 import com.example.rmp1.pages.ItemInfo
 import com.example.rmp1.pages.Main
 import com.example.rmp1.pages.NewCategory
@@ -27,6 +28,8 @@ fun NavContent(
     newCategory: String,
     newItem: String,
     newFieldName: String,
+    itemFields: List<Field>,
+    itemValues: List<Value>,
     onItemChange: (String) -> Unit = {},
     onCategoryChange: (String) -> Unit = {},
     onFieldChange: (String) -> Unit = {},
@@ -34,6 +37,9 @@ fun NavContent(
     onAddCategory: () -> Unit = {},
     onAddItem: () -> Unit = {},
     onAppendField: () -> Unit = {},
+    onAppendItemValue: (Long, Long, String) -> Unit,
+    onSaveItemValues: () -> Unit = {},
+    onDeleteItem: () -> Unit = {}
 ) {
     NavHost(
         navController = navController,
@@ -72,7 +78,12 @@ fun NavContent(
             ItemInfo(
                 Modifier.fillMaxSize(),
                 navController,
-                selectedItem
+                selectedItem,
+                itemFields,
+                itemValues,
+                onAppendItemValue,
+                onSaveItemValues,
+                onDeleteItem
             )
         }
     }

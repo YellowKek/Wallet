@@ -13,7 +13,7 @@ interface CategoryDao {
     @Query("select * from categories")
     fun getAll(): List<Category>
 
-    @Query("select * from categories where categoryName = :name limit 1")
+    @Query("select * from categories where name = :name limit 1")
     fun getByName(name: String): Category
 
     @Insert
@@ -25,7 +25,7 @@ interface CategoryDao {
     @Update
     fun update(category: Category)
 
-    @Query("update categories set category_name = :newName where id = :categoryId")
+    @Query("update categories set name = :newName where id = :categoryId")
     fun rename(categoryId: Long, newName: String)
 
     @Query("delete from fields where category_id = :categoryId and field_name = :fieldName")

@@ -15,4 +15,7 @@ interface FieldDao {
 
     @Insert
     fun insertAll(vararg fields: Field)
+
+    @Query("select * from fields where category_id = :id")
+    fun getByCategory(id: Long): List<Field>
 }
