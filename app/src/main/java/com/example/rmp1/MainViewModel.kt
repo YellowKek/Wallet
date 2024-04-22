@@ -12,7 +12,9 @@ import com.example.rmp1.database.entity.Item
 
 class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val db =
-        Room.databaseBuilder(app.applicationContext, AppDatabase::class.java, "RMP").build()
+        Room.databaseBuilder(app.applicationContext, AppDatabase::class.java, "RMP")
+            .allowMainThreadQueries().build()
+
     private val categoryDao = db.getCategoryDao()
     private val fieldDao = db.getFieldDao()
     private val itemDao = db.getItemDao()
@@ -38,10 +40,12 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun addCategory() {
-        categoryDao.insert(newCategory)
+        categoryDao.insert(Category(0, newCategory))
+        categories = categoryDao.getAll()
     }
 
     fun addItem() {
-        selectedCategory?.let { itemDao.insert(it.id, newItem) }
+        selectedCategory?.let { itemDao.insert(Item(0, selectedCategory!!.id, newItem)) }
+        items = itemDao.getAll()
     }
 }
