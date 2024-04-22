@@ -23,7 +23,6 @@ class MainActivity : ComponentActivity() {
             val navController: NavHostController = rememberNavController()
             val position by navController.currentBackStackEntryAsState()
             RMP1Theme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

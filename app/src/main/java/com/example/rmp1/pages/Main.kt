@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.rmp1.R
-import com.example.rmp1.database.Category
-import com.example.rmp1.database.Item
+import com.example.rmp1.database.entity.Category
+import com.example.rmp1.database.entity.Item
 import com.example.rmp1.navigation.Page
 
 @Composable
@@ -99,7 +99,7 @@ fun CategoryInfo(
             .clickable {
                 onSelect()
             }) {
-            Text(text = category.categoryName)
+            Text(text = category.name)
         }
     }
 }

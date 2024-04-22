@@ -12,8 +12,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.rmp1.database.Category
-import com.example.rmp1.database.Item
+import com.example.rmp1.database.entity.Category
+import com.example.rmp1.database.entity.Item
 import com.example.rmp1.pages.Main
 import com.example.rmp1.pages.NewCategory
 

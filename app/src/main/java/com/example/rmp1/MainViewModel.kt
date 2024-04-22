@@ -11,8 +11,6 @@ import com.example.rmp1.database.entity.Category
 import com.example.rmp1.database.entity.Item
 
 class MainViewModel(app: Application) : AndroidViewModel(app) {
-//    private val dbHelper = DbHelper(getApplication())
-
     private val db =
         Room.databaseBuilder(app.applicationContext, AppDatabase::class.java, "RMP").build()
     private val categoryDao = db.getCategoryDao()
@@ -21,27 +19,29 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val valueDao = db.getValueDao()
 
     var newItem by mutableStateOf("")
+    var newCategory by mutableStateOf("")
 
     var categories by mutableStateOf(listOf<Category>())
         private set
-
     var items by mutableStateOf(listOf<Item>())
         private set
+
     var selectedCategory by mutableStateOf<Category?>(null)
 
     init {
-
+        categories = categoryDao.getAll()
     }
 
     fun selectCategory(category: Category) {
         selectedCategory = category
-//        items = dbHelper.getItemsByCategory(category.categoryName)
+        items = itemDao.getByCategory(category.id)
+    }
+
+    fun addCategory() {
+        categoryDao.insert(newCategory)
     }
 
     fun addItem() {
-        selectedCategory?.let {
-//            dbHelper.addItem(newItem, it.id)
-//            items = dbHelper.getItemsByCategory(it.categoryName)
-        }
+        selectedCategory?.let { itemDao.insert(it.id, newItem) }
     }
 }
