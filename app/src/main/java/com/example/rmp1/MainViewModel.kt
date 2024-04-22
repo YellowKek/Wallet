@@ -13,6 +13,7 @@ import com.example.rmp1.database.entity.Field
 import com.example.rmp1.database.entity.Item
 
 class MainViewModel(app: Application) : AndroidViewModel(app) {
+
     private val db =
         Room.databaseBuilder(app.applicationContext, AppDatabase::class.java, "RMP")
             .allowMainThreadQueries().build()
