@@ -13,8 +13,11 @@ interface ItemDao {
     @Query("select * from items")
     fun getAll(): List<Item>
 
+    @Query("select * from items where category_id = :categoryId")
+    fun getByCategory(categoryId: Long): List<Item>
+
     @Insert
-    fun insert(item: Item)
+    fun insert(categoryId: Long, name: String)
 
     @Delete
     fun delete(item: Item)

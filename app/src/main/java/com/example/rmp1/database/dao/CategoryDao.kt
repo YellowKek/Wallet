@@ -13,8 +13,8 @@ interface CategoryDao {
     @Query("select * from categories")
     fun getAll(): List<Category>
 
-    @Insert
-    fun insert(category: Category)
+    @Insert(entity = Category::class)
+    fun insert(name: String)
 
     @Delete
     fun delete(category: Category)
