@@ -25,6 +25,6 @@ interface CategoryDao {
     @Query("update categories set category_name = :newName where id = :categoryId")
     fun rename(categoryId: Long, newName: String)
 
-    @Delete()
+    @Query("delete from fields where category_id = :categoryId and field_name = :fieldName")
     fun deleteField(categoryId: Long, fieldName: String)
 }
