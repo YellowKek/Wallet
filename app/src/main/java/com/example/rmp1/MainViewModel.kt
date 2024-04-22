@@ -11,7 +11,6 @@ import com.example.rmp1.database.entity.Category
 import com.example.rmp1.database.entity.Item
 
 class MainViewModel(app: Application) : AndroidViewModel(app) {
-//    private val dbHelper = DbHelper(getApplication())
 
     private val db =
         Room.databaseBuilder(app.applicationContext, AppDatabase::class.java, "RMP").build()
@@ -35,13 +34,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun selectCategory(category: Category) {
         selectedCategory = category
-//        items = dbHelper.getItemsByCategory(category.categoryName)
     }
 
     fun addItem() {
         selectedCategory?.let {
-//            dbHelper.addItem(newItem, it.id)
-//            items = dbHelper.getItemsByCategory(it.categoryName)
         }
     }
 }
