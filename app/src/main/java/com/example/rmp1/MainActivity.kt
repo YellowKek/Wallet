@@ -1,29 +1,32 @@
 package com.example.rmp1
 
 import android.os.Bundle
+import androidx.compose.material3.Button
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.rmp1.database.Category
-import com.example.rmp1.database.Item
+import com.example.rmp1.database.entity.Category
+import com.example.rmp1.database.entity.Item
 import com.example.rmp1.ui.theme.RMP1Theme
-import java.nio.file.WatchEvent
 
 class MainActivity : ComponentActivity() {
     val mvm: MainViewModel by viewModels()
@@ -42,7 +45,8 @@ class MainActivity : ComponentActivity() {
                         mvm::selectCategory,
                         items = mvm.items,
                         mvm.newItem,
-                        mvm::addItem
+                        mvm::addItem,
+                        { mvm.newItem = it }
                     )
                 }
             }
@@ -58,6 +62,7 @@ fun MainUI(
     items: List<Item>,
     newItem: String,
     onAddItem: () -> Unit = {},
+    onNewStudChange: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Scaffold(modifier = modifier) {
@@ -65,6 +70,22 @@ fun MainUI(
             LazyRow {
                 items(categories) {
                     CategoryInfo(it) { onSelectCategory(it) }
+                }
+            }
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    value = newItem,
+                    onValueChange = onNewStudChange,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(8.dp, 0.dp)
+                )
+                Button(
+                    onClick = onAddItem,
+                    modifier = Modifier.weight(0.3f),
+                    enabled = canAdd
+                ) {
+
                 }
             }
             LazyColumn {
@@ -81,7 +102,7 @@ fun ItemInfo(
     item: Item,
     modifier: Modifier = Modifier
 ) {
-    Card (modifier = modifier) {
+    Card(modifier = modifier) {
         Column(modifier = Modifier.padding(8.dp)) {
             Text(text = item.itemName)
         }
