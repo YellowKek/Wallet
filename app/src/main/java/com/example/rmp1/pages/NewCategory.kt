@@ -1,5 +1,6 @@
 package com.example.rmp1.pages
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,6 +8,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -16,18 +20,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.navigation.NavHostController
 import com.example.rmp1.R
+import com.example.rmp1.database.entity.Field
 
 @Composable
 fun NewCategory(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     newCategory: String,
+    newFieldName: String,
+    newCategoryFields: List<Field>,
     onCategoryChange: (String) -> Unit = {},
+    onFieldChange: (String) -> Unit = {},
     onAddCategory: () -> Unit = {},
+    onAppendField: () -> Unit = {},
 ) {
     Column(
         modifier = modifier,
@@ -59,14 +69,51 @@ fun NewCategory(
                             placeholder = { Text("Название") },
                             modifier = Modifier
                                 .weight(1f)
-                                .padding(8.dp, 0.dp)
+                                .padding(8.dp, 0.dp, 0.dp, 20.dp)
                         )
                     }
-//                LazyRow {
-//                    items(fields) { // TODO fields
-////                        CategoryInfo(it) { onSelectCategory(it) }
-//                    }
-//                }
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Поля",
+                            fontSize = 9.em,
+                            modifier = Modifier
+                                .padding(0.dp, 15.dp)
+                        )
+                    }
+                    LazyColumn(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                        items(newCategoryFields) {
+                            Text(
+                                text = it.name,
+                                fontSize = 8.em,
+                                modifier = Modifier
+                                    .padding(0.dp, 10.dp)
+                            )
+                        }
+                    }
+                    Row(
+                        Modifier.fillMaxWidth(),
+                    ) {
+                        OutlinedTextField(
+                            value = newFieldName,
+                            onValueChange = onFieldChange,
+                            placeholder = { Text("Поле") },
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(8.dp, 0.dp, 0.dp, 15.dp)
+                        )
+                    }
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth(0.4f)
+                            .height(50.dp)
+                            .align(Alignment.CenterHorizontally),
+                        onClick = onAppendField
+                    ) {
+                        Text("Добавить")
+                    }
                 }
                 Button(
                     modifier = Modifier

@@ -20,5 +20,5 @@ import androidx.room.PrimaryKey
 data class Field(
     @PrimaryKey(autoGenerate = true) var id: Long,
     @ColumnInfo(name = "category_id") var categoryId: Long,
-    @ColumnInfo(name = "field_name") var fieldName: String,
+    @ColumnInfo(name = "field_name") var name: String,
 )

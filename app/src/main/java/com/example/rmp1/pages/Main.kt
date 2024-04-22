@@ -4,10 +4,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -21,10 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.rmp1.R
 import com.example.rmp1.database.entity.Category
@@ -35,10 +32,16 @@ import com.example.rmp1.navigation.Page
 fun Main(
     modifier: Modifier = Modifier,
     navController: NavHostController,
+    isCategorySelected: Boolean,
+    newItem: String,
     categories: List<Category>,
     onSelectCategory: (Category) -> Unit = {},
+    onSelectItem: (Item) -> Unit = {},
+    onItemChange: (String) -> Unit = {},
+    onAddItem: () -> Unit = {},
+    onDeleteCategory: () -> Unit = {},
     items: List<Item>,
-){
+) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
@@ -46,20 +49,69 @@ fun Main(
     ) {
         Scaffold(modifier = modifier) {
             Column(modifier = Modifier.padding(it)) {
-                LazyRow {
-                    items(categories) {
-                        CategoryInfo(it) { onSelectCategory(it) }
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(0.dp, 0.dp, 0.dp, 20.dp)
+                ) {
+                    LazyRow {
+                        items(categories) {
+                            CategoryInfo(it) { onSelectCategory(it) }
+                        }
                     }
                 }
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f)
+                            .height(50.dp)
+                            .padding(0.dp, 0.dp, 0.dp, 10.dp),
+                        onClick = { navController.navigate(Page.NEW_CATEGORY.route) }
+                    ) {
+                        Text("Добавить")
+                    }
+                    if (isCategorySelected) {
+                        Button(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp)
+                                .padding(0.dp, 0.dp, 0.dp, 10.dp),
+                            onClick = onDeleteCategory
+                        ) {
+                            Text("Удалить")
+                        }
+                    }
+                }
+
                 LazyColumn {
                     items(items) {
-                        ItemInfo(it)
+                        Button(onClick = {
+                            onSelectItem(it)
+                            navController.navigate(Page.ITEM.route)
+                        }) {
+                            Text(text = it.name)
+                        }
                     }
                 }
-                Row(Modifier.width(75.dp), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.End) {
+                if (isCategorySelected) {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                    ) {
+                        OutlinedTextField(
+                            value = newItem,
+                            onValueChange = onItemChange,
+                            placeholder = { Text("Объект") },
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(8.dp, 0.dp, 0.dp, 15.dp)
+                        )
+                    }
                     Button(
-                        modifier = Modifier,
-                        onClick = { navController.navigate(Page.NEW_CATEGORY.route) }
+                        modifier = Modifier
+                            .fillMaxWidth(0.15f)
+                            .fillMaxHeight(0.08f)
+                            .align(Alignment.CenterHorizontally),
+                        onClick = onAddItem
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.baseline_add_circle_outline_24),
@@ -71,19 +123,6 @@ fun Main(
         }
     }
 }
-
-@Composable
-fun ItemInfo(
-    item: Item,
-    modifier: Modifier = Modifier
-) {
-    Card(modifier = modifier) {
-        Column(modifier = Modifier.padding(8.dp)) {
-            Text(text = item.itemName)
-        }
-    }
-}
-
 
 @Composable
 fun CategoryInfo(

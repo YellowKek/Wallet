@@ -13,6 +13,9 @@ interface CategoryDao {
     @Query("select * from categories")
     fun getAll(): List<Category>
 
+    @Query("select * from categories where categoryName = :name limit 1")
+    fun getByName(name: String): Category
+
     @Insert
     fun insert(category: Category)
 

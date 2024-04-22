@@ -18,5 +18,5 @@ import androidx.room.PrimaryKey
 data class Item(
     @PrimaryKey(autoGenerate = true) var id: Long,
     @ColumnInfo(name = "category_id") var categoryId: Long,
-    @ColumnInfo(name = "item_name") var itemName: String,
+    @ColumnInfo(name = "item_name") var name: String,
 )

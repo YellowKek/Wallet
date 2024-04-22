@@ -30,14 +30,22 @@ class MainActivity : ComponentActivity() {
                     NavContent(
                         navController = navController,
                         categories = mvm.categories,
-                        canAdd = mvm.selectedCategory != null,
-                        onSelectCategory = mvm::selectCategory,
                         items = mvm.items,
+                        newCategoryFields = mvm.newCategoryFields,
+                        isCategorySelected = mvm.selectedCategory != null,
                         newCategory = mvm.newCategory,
                         newItem = mvm.newItem,
+                        newFieldName = mvm.newFieldName,
+                        selectedItem = mvm.selectedItem,
+                        onSelectCategory = mvm::selectCategory,
+                        onSelectItem = mvm::selectItem,
+                        onItemChange = { mvm.newItem = it },
                         onCategoryChange = { mvm.newCategory = it },
+                        onFieldChange = { mvm.newFieldName = it },
+                        onDeleteCategory = mvm::deleteCategory,
                         onAddCategory = mvm::addCategory,
-                        onAddItem = mvm::addItem
+                        onAddItem = mvm::addItem,
+                        onAppendField = mvm::appendField
                     )
                 }
             }
