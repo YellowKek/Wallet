@@ -17,7 +17,7 @@ interface ItemDao {
     fun getByCategory(categoryId: Long): List<Item>
 
     @Insert
-    fun insert(categoryId: Long, name: String)
+    fun insert(item: Item)
 
     @Delete
     fun delete(item: Item)
