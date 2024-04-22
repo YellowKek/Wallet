@@ -47,7 +47,6 @@ class DbHelper(context: Context) :
                                 "field_id  INTEGER REFERENCES $TBL_FIELDS (id) NOT NULL," +
                                 "value     TEXT    NOT NULL );"
                     )
-                    addCategory("TEST", db)
                     db.setTransactionSuccessful()
                 } finally {
                     db.endTransaction()
@@ -77,8 +76,8 @@ class DbHelper(context: Context) :
     }
 
 
-    fun addCategory(categoryName: String, database: SQLiteDatabase? = null) {
-        with(database ?: writableDatabase) {
+    fun addCategory(categoryName: String) {
+        with(writableDatabase) {
             beginTransaction()
             val values = ContentValues()
             values.put("category_name", categoryName)
@@ -128,7 +127,7 @@ class DbHelper(context: Context) :
         }
     }
 
-    fun getItemsByCategory(categoryName: String): List<Item> {
+    fun getItemsByCategory(categoryId: Long): List<Item> {
         val items = mutableListOf<Item>()
         with(readableDatabase) {
             beginTransaction()
@@ -136,8 +135,8 @@ class DbHelper(context: Context) :
                 query(
                     TBL_ITEMS,
                     arrayOf("id", "category_id", "object_name"),
-                    "category_name = ?",
-                    arrayOf(categoryName),
+                    "category_id = ?",
+                    arrayOf(categoryId.toString()),
                     null,
                     null,
                     null

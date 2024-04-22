@@ -9,7 +9,7 @@ import com.example.rmp1.database.Category
 import com.example.rmp1.database.DbHelper
 import com.example.rmp1.database.Item
 
-class MainViewModel(app: Application) : AndroidViewModel(app){
+class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val dbHelper = DbHelper(getApplication())
     var newItem by mutableStateOf("")
 
@@ -18,9 +18,16 @@ class MainViewModel(app: Application) : AndroidViewModel(app){
 
     var items by mutableStateOf(listOf<Item>())
         private set
+
+    var newCategory by mutableStateOf("")
     var selectedCategory by mutableStateOf<Category?>(null)
 
     init {
+        categories = dbHelper.getAllCategories()
+    }
+
+    fun addCategory() {
+        dbHelper.addCategory(newCategory)
         categories = dbHelper.getAllCategories()
     }
 
@@ -28,10 +35,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app){
         selectedCategory = category
         items = dbHelper.getItemsByCategory(category.id)
     }
+
     fun addItem() {
         selectedCategory?.let {
-            dbHelper.addItem(newItem, it.categoryName)
-            items = dbHelper.getItemsByCategory(it.categoryName)
+            dbHelper.addItem(newItem, it.id)
+            items = dbHelper.getItemsByCategory(it.id)
         }
     }
 }
