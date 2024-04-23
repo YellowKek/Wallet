@@ -37,8 +37,7 @@ fun NavContent(
     onAddCategory: () -> Unit = {},
     onAddItem: () -> Unit = {},
     onAppendField: () -> Unit = {},
-    onAppendItemValue: (Long, Long, String) -> Unit,
-    onSaveItemValues: () -> Unit = {},
+    onSaveItemValues: (List<Value>) -> Unit = {},
     onDeleteItem: () -> Unit = {}
 ) {
     NavHost(
@@ -81,7 +80,6 @@ fun NavContent(
                 selectedItem,
                 itemFields,
                 itemValues,
-                onAppendItemValue,
                 onSaveItemValues,
                 onDeleteItem
             )

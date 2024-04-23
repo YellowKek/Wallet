@@ -27,7 +27,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     var newCategory by mutableStateOf("")
     var newFieldName by mutableStateOf("")
     var newCategoryFields by mutableStateOf(listOf<Field>())
-    var updatedItemValues by mutableStateOf(listOf<Value>())
+
+    var selectedItemFields by mutableStateOf(listOf<Field>())
+    var selectedItemValues by mutableStateOf(listOf<Value>())
 
     var categories by mutableStateOf(listOf<Category>())
         private set
@@ -48,6 +50,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun selectItem(item: Item) {
         selectedItem = item
+        selectedItemFields = getCategoryFields(selectedCategory)
+        selectedItemValues = getItemValues(selectedItem)
     }
 
     fun addCategory() {
@@ -97,13 +101,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         selectedItem = null
     }
 
-    fun saveItemValues() {
-        for (value in updatedItemValues) {
+    fun saveItemValues(values: List<Value>) {
+        for (value in values) {
             valueDao.update(value)
         }
-    }
-
-    fun appendItemValue(valueId: Long, fieldId: Long, newValue: String) {
-        selectedItem?.let { updatedItemValues += Value(valueId, it.id, fieldId, newValue) }
+        selectedItemValues = getItemValues(selectedItem)
     }
 }

@@ -30,8 +30,8 @@ class MainActivity : ComponentActivity() {
                         items = mvm.items,
                         newCategoryFields = mvm.newCategoryFields,
                         isCategorySelected = mvm.selectedCategory != null,
-                        itemFields = mvm.getCategoryFields(mvm.selectedCategory),
-                        itemValues = mvm.getItemValues(mvm.selectedItem),
+                        itemFields = mvm.selectedItemFields,
+                        itemValues = mvm.selectedItemValues,
                         newCategory = mvm.newCategory,
                         newItem = mvm.newItem,
                         newFieldName = mvm.newFieldName,
@@ -45,7 +45,6 @@ class MainActivity : ComponentActivity() {
                         onAddCategory = mvm::addCategory,
                         onAddItem = mvm::addItem,
                         onAppendField = mvm::appendField,
-                        onAppendItemValue = mvm::appendItemValue,
                         onSaveItemValues = mvm::saveItemValues,
                         onDeleteItem = mvm::deleteItem
                     )
