@@ -21,7 +21,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
+import androidx.navigation.ActivityNavigator
 import androidx.navigation.NavHostController
 import com.example.rmp1.R
 import com.example.rmp1.database.entity.Category
@@ -32,21 +35,24 @@ import com.example.rmp1.navigation.Page
 fun Main(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    isCategorySelected: Boolean,
-    newItem: String,
     categories: List<Category>,
     onSelectCategory: (Category) -> Unit = {},
-    onSelectItem: (Item) -> Unit = {},
-    onItemChange: (String) -> Unit = {},
-    onAddItem: () -> Unit = {},
-    onDeleteCategory: () -> Unit = {},
-    items: List<Item>,
 ) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                modifier = Modifier.padding(0.dp, 10.dp),
+                fontSize = 10.em,
+                text = "Категории",
+            )
+        }
         Scaffold(modifier = modifier) {
             Column(modifier = Modifier.padding(it)) {
                 Row(
@@ -54,69 +60,23 @@ fun Main(
                         .fillMaxWidth()
                         .padding(0.dp, 0.dp, 0.dp, 20.dp)
                 ) {
-                    LazyRow {
+                    LazyColumn {
                         items(categories) {
-                            CategoryInfo(it) { onSelectCategory(it) }
+                            CategoryCard(it) {
+                                onSelectCategory(it)
+                                navController.navigate(Page.CATEGORY.route)
+                            }
                         }
                     }
                 }
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Button(
                         modifier = Modifier
-                            .fillMaxWidth(0.5f)
-                            .height(50.dp)
-                            .padding(0.dp, 0.dp, 0.dp, 10.dp),
+                            .fillMaxWidth(0.6f)
+                            .height(60.dp),
                         onClick = { navController.navigate(Page.NEW_CATEGORY.route) }
                     ) {
                         Text("Добавить")
-                    }
-                    if (isCategorySelected) {
-                        Button(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(50.dp)
-                                .padding(0.dp, 0.dp, 0.dp, 10.dp),
-                            onClick = onDeleteCategory
-                        ) {
-                            Text("Удалить")
-                        }
-                    }
-                }
-
-                LazyColumn {
-                    items(items) {
-                        Button(onClick = {
-                            onSelectItem(it)
-                            navController.navigate(Page.ITEM.route)
-                        }) {
-                            Text(text = it.name)
-                        }
-                    }
-                }
-                if (isCategorySelected) {
-                    Row(
-                        Modifier.fillMaxWidth(),
-                    ) {
-                        OutlinedTextField(
-                            value = newItem,
-                            onValueChange = onItemChange,
-                            placeholder = { Text("Объект") },
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(8.dp, 0.dp, 0.dp, 15.dp)
-                        )
-                    }
-                    Button(
-                        modifier = Modifier
-                            .fillMaxWidth(0.15f)
-                            .fillMaxHeight(0.08f)
-                            .align(Alignment.CenterHorizontally),
-                        onClick = onAddItem
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.baseline_add_circle_outline_24),
-                            contentDescription = null
-                        )
                     }
                 }
             }
@@ -125,20 +85,28 @@ fun Main(
 }
 
 @Composable
-fun CategoryInfo(
+fun CategoryCard(
     category: Category,
     modifier: Modifier = Modifier,
     onSelect: () -> Unit = {},
 ) {
     Card(
-        modifier = modifier,
-    ) {
-        Column(modifier = Modifier
-            .padding(8.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp)
             .clickable {
                 onSelect()
-            }) {
-            Text(text = category.name)
+            }
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(8.dp)
+        ) {
+            Text(
+                modifier = Modifier.padding(10.dp, 0.dp, 0.dp, 0.dp),
+                fontSize = 10.em,
+                text = category.name
+            )
         }
     }
 }

@@ -23,11 +23,6 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val itemDao = db.getItemDao()
     private val valueDao = db.getValueDao()
 
-    var newItem by mutableStateOf("")
-    var newCategory by mutableStateOf("")
-    var newFieldName by mutableStateOf("")
-    var newCategoryFields by mutableStateOf(listOf<Field>())
-
     var selectedItemFields by mutableStateOf(listOf<Field>())
     var selectedItemValues by mutableStateOf(listOf<Value>())
 
@@ -54,23 +49,22 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         selectedItemValues = getItemValues(selectedItem)
     }
 
-    fun addCategory() {
+    fun addCategory(newCategory: String, fields: List<String>) {
         categoryDao.insert(Category(0, newCategory))
         val category = categoryDao.getByName(newCategory)
 
-        newCategoryFields.forEach { it.categoryId = category.id }
+        val newCategoryFields = Array(fields.size) { Field(0, category.id, newCategory) }
 
-        fieldDao.insertAll(*newCategoryFields.toTypedArray())
+        fieldDao.insertAll(*newCategoryFields)
         categories = categoryDao.getAll()
     }
 
-    fun addItem() {
-        selectedCategory?.let {
-            val itemId = itemDao.insert(Item(0, selectedCategory!!.id, newItem))
+    fun addItem(newItem: String) {
+        selectedCategory?.let { cat ->
+            val itemId = itemDao.insert(Item(0, cat.id, newItem))
             val fields = getCategoryFields(selectedCategory)
-            fields.forEach { valueDao.insert(Value(0, itemId, it.id, "Пусто")) }
-            items = itemDao.getByCategory(selectedCategory!!.id)
-            newItem = ""
+            fields.forEach { valueDao.insert(Value(0, itemId, it.id, "")) }
+            items = itemDao.getByCategory(cat.id)
         }
     }
 
@@ -82,11 +76,6 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun getItemValues(item: Item?): List<Value> {
         item?.let { return valueDao.getByItem(it.id) }
         return emptyList()
-    }
-
-    fun appendField() {
-        newCategoryFields += Field(0, 0, newFieldName)
-        newFieldName = ""
     }
 
     fun deleteCategory() {

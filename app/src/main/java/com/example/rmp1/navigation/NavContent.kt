@@ -10,6 +10,7 @@ import com.example.rmp1.database.entity.Category
 import com.example.rmp1.database.entity.Field
 import com.example.rmp1.database.entity.Item
 import com.example.rmp1.database.entity.Value
+import com.example.rmp1.pages.CategoryInfo
 import com.example.rmp1.pages.ItemInfo
 import com.example.rmp1.pages.Main
 import com.example.rmp1.pages.NewCategory
@@ -19,24 +20,16 @@ fun NavContent(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     categories: List<Category>,
-    isCategorySelected: Boolean = false,
     onSelectCategory: (Category) -> Unit = {},
     onSelectItem: (Item) -> Unit = {},
     items: List<Item>,
-    newCategoryFields: List<Field>,
+    selectedCategory: Category?,
     selectedItem: Item?,
-    newCategory: String,
-    newItem: String,
-    newFieldName: String,
     itemFields: List<Field>,
     itemValues: List<Value>,
-    onItemChange: (String) -> Unit = {},
-    onCategoryChange: (String) -> Unit = {},
-    onFieldChange: (String) -> Unit = {},
     onDeleteCategory: () -> Unit = {},
-    onAddCategory: () -> Unit = {},
-    onAddItem: () -> Unit = {},
-    onAppendField: () -> Unit = {},
+    onAddCategory: (String, List<String>) -> Unit,
+    onAddItem: (String) -> Unit = {},
     onSaveItemValues: (List<Value>) -> Unit = {},
     onDeleteItem: () -> Unit = {}
 ) {
@@ -49,28 +42,26 @@ fun NavContent(
             Main(
                 Modifier.fillMaxSize(),
                 navController,
-                isCategorySelected,
-                newItem,
                 categories,
                 onSelectCategory,
-                onSelectItem,
-                onItemChange,
-                onAddItem,
-                onDeleteCategory,
-                items,
             )
         }
         composable(Page.NEW_CATEGORY.route) {
             NewCategory(
                 Modifier.fillMaxSize(),
                 navController,
-                newCategory,
-                newFieldName,
-                newCategoryFields,
-                onCategoryChange,
-                onFieldChange,
                 onAddCategory,
-                onAppendField
+            )
+        }
+        composable(Page.CATEGORY.route) {
+            CategoryInfo(
+                Modifier.fillMaxSize(),
+                navController,
+                selectedCategory,
+                items,
+                onDeleteCategory,
+                onSelectItem,
+                onAddItem,
             )
         }
         composable(Page.ITEM.route) {

@@ -1,6 +1,5 @@
 package com.example.rmp1.pages
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -17,10 +15,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.navigation.NavHostController
@@ -31,14 +32,12 @@ import com.example.rmp1.database.entity.Field
 fun NewCategory(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    newCategory: String,
-    newFieldName: String,
-    newCategoryFields: List<Field>,
-    onCategoryChange: (String) -> Unit = {},
-    onFieldChange: (String) -> Unit = {},
-    onAddCategory: () -> Unit = {},
-    onAppendField: () -> Unit = {},
+    onAddCategory: (String, List<String>) -> Unit,
 ) {
+    var newCategory by remember { mutableStateOf("") }
+    var newFieldName by remember { mutableStateOf("") }
+    var newCategoryFields by remember { mutableStateOf(listOf<String>()) }
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
@@ -65,7 +64,7 @@ fun NewCategory(
                     ) {
                         OutlinedTextField(
                             value = newCategory,
-                            onValueChange = onCategoryChange,
+                            onValueChange = { newCategory = it },
                             placeholder = { Text("Название") },
                             modifier = Modifier
                                 .weight(1f)
@@ -84,9 +83,9 @@ fun NewCategory(
                         )
                     }
                     LazyColumn(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                        items(newCategoryFields) {
+                        items(newCategoryFields) { field ->
                             Text(
-                                text = it.name,
+                                text = field,
                                 fontSize = 8.em,
                                 modifier = Modifier
                                     .padding(0.dp, 10.dp)
@@ -98,7 +97,7 @@ fun NewCategory(
                     ) {
                         OutlinedTextField(
                             value = newFieldName,
-                            onValueChange = onFieldChange,
+                            onValueChange = { newFieldName = it },
                             placeholder = { Text("Поле") },
                             modifier = Modifier
                                 .weight(1f)
@@ -110,7 +109,10 @@ fun NewCategory(
                             .fillMaxWidth(0.4f)
                             .height(50.dp)
                             .align(Alignment.CenterHorizontally),
-                        onClick = onAppendField
+                        onClick = {
+                            newCategoryFields += newFieldName
+                            newFieldName = ""
+                        }
                     ) {
                         Text("Добавить")
                     }
@@ -121,7 +123,7 @@ fun NewCategory(
                         .height(60.dp)
                         .align(Alignment.CenterHorizontally),
                     onClick = {
-                        onAddCategory()
+                        onAddCategory(newCategory, newCategoryFields)
                         navController.popBackStack()
                     }
                 ) {
