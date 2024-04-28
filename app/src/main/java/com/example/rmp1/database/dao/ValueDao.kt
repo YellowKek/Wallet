@@ -12,6 +12,9 @@ interface ValueDao {
     @Insert
     fun insert(value: Value)
 
+    @Insert
+    fun insertAll(vararg values: Value)
+
     @Query("select * from `values` where item_id = :itemId")
     fun getByItem(itemId: Long): List<Value>
 

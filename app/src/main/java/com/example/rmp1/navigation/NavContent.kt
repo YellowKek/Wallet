@@ -14,6 +14,7 @@ import com.example.rmp1.pages.CategoryInfo
 import com.example.rmp1.pages.ItemInfo
 import com.example.rmp1.pages.Main
 import com.example.rmp1.pages.NewCategory
+import com.example.rmp1.pages.NewItem
 
 @Composable
 fun NavContent(
@@ -25,12 +26,12 @@ fun NavContent(
     items: List<Item>,
     selectedCategory: Category?,
     selectedItem: Item?,
-    itemFields: List<Field>,
+    categoryFields: List<Field>,
     itemValues: List<Value>,
     onDeleteCategory: () -> Unit = {},
     onAddCategory: (String, List<String>) -> Unit,
-    onAddItem: (String) -> Unit = {},
-    onSaveItemValues: (List<Value>) -> Unit = {},
+    onAddItem: (String, Array<String>) -> Boolean,
+    onSaveItemValues: (List<Value>) -> Unit,
     onDeleteItem: () -> Unit = {}
 ) {
     NavHost(
@@ -61,7 +62,6 @@ fun NavContent(
                 items,
                 onDeleteCategory,
                 onSelectItem,
-                onAddItem,
             )
         }
         composable(Page.ITEM.route) {
@@ -69,10 +69,18 @@ fun NavContent(
                 Modifier.fillMaxSize(),
                 navController,
                 selectedItem,
-                itemFields,
+                categoryFields,
                 itemValues,
                 onSaveItemValues,
                 onDeleteItem
+            )
+        }
+        composable(Page.NEW_ITEM.route) {
+            NewItem(
+                Modifier.fillMaxSize(),
+                navController,
+                categoryFields,
+                onAddItem,
             )
         }
     }

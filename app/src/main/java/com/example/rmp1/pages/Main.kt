@@ -69,11 +69,14 @@ fun Main(
                         }
                     }
                 }
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
                     Button(
                         modifier = Modifier
-                            .fillMaxWidth(0.6f)
-                            .height(60.dp),
+                            .fillMaxWidth(0.5f)
+                            .height(50.dp),
                         onClick = { navController.navigate(Page.NEW_CATEGORY.route) }
                     ) {
                         Text("Добавить")

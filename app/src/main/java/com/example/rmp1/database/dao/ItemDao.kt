@@ -1,5 +1,6 @@
 package com.example.rmp1.database.dao
 
+import android.database.sqlite.SQLiteConstraintException
 import com.example.rmp1.database.entity.Item
 import androidx.room.Dao
 import androidx.room.Delete

@@ -23,7 +23,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val itemDao = db.getItemDao()
     private val valueDao = db.getValueDao()
 
-    var selectedItemFields by mutableStateOf(listOf<Field>())
+    var selectedCategoryFields by mutableStateOf(listOf<Field>())
     var selectedItemValues by mutableStateOf(listOf<Value>())
 
     var categories by mutableStateOf(listOf<Category>())
@@ -40,12 +40,12 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun selectCategory(category: Category) {
         selectedCategory = category
+        selectedCategoryFields = getCategoryFields(selectedCategory)
         items = itemDao.getByCategory(category.id)
     }
 
     fun selectItem(item: Item) {
         selectedItem = item
-        selectedItemFields = getCategoryFields(selectedCategory)
         selectedItemValues = getItemValues(selectedItem)
     }
 
@@ -53,19 +53,33 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         categoryDao.insert(Category(0, newCategory))
         val category = categoryDao.getByName(newCategory)
 
-        val newCategoryFields = Array(fields.size) { Field(0, category.id, newCategory) }
+        val newCategoryFields = Array(fields.size) { Field(0, category.id, "") }
+        for (i in newCategoryFields.indices) {
+            newCategoryFields[i].name = fields[i]
+        }
 
         fieldDao.insertAll(*newCategoryFields)
         categories = categoryDao.getAll()
     }
 
-    fun addItem(newItem: String) {
+    fun addItem(newItem: String, values: Array<String>): Boolean {
         selectedCategory?.let { cat ->
+            if (items.any { item -> item.name == newItem }) {
+                return false
+            }
+
             val itemId = itemDao.insert(Item(0, cat.id, newItem))
-            val fields = getCategoryFields(selectedCategory)
-            fields.forEach { valueDao.insert(Value(0, itemId, it.id, "")) }
+            val itemValues = Array(values.size) { Value(0, itemId, 0, "") }
+            for (i in itemValues.indices) {
+                itemValues[i].fieldId = selectedCategoryFields[i].id
+                itemValues[i].value = values[i]
+            }
+
+            valueDao.insertAll(*itemValues)
             items = itemDao.getByCategory(cat.id)
         }
+
+        return true
     }
 
     fun getCategoryFields(category: Category?): List<Field> {
