@@ -20,13 +20,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.navigation.NavController
 import com.example.rmp1.database.entity.Category
 import com.example.rmp1.database.entity.Item
 import com.example.rmp1.navigation.Page
+import kotlin.reflect.KFunction1
 
 @Composable
 fun CategoryInfo(
@@ -35,7 +35,7 @@ fun CategoryInfo(
     category: Category?,
     items: List<Item>,
     onDeleteCategory: () -> Unit = {},
-    onSelectItem: (Item) -> Unit = {},
+    onSelectItem: KFunction1<Item, Unit>,
     onAddItem: (String) -> Unit = {},
 ) {
     var newItem by remember { mutableStateOf("") }
@@ -100,6 +100,7 @@ fun CategoryInfo(
         }
     }
 }
+
 
 @Composable
 fun ItemCard(

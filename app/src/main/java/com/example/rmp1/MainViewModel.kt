@@ -11,12 +11,19 @@ import com.example.rmp1.database.entity.Category
 import com.example.rmp1.database.entity.Field
 import com.example.rmp1.database.entity.Item
 import com.example.rmp1.database.entity.Value
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 class MainViewModel(app: Application) : AndroidViewModel(app) {
 
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+
     private val db =
-        Room.databaseBuilder(app.applicationContext, AppDatabase::class.java, "RMP")
-            .allowMainThreadQueries().build()
+        Room.databaseBuilder(app.applicationContext, AppDatabase::class.java, "RMP").build()
 
     private val categoryDao = db.getCategoryDao()
     private val fieldDao = db.getFieldDao()
@@ -35,65 +42,106 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     var selectedItem by mutableStateOf<Item?>(null)
 
     init {
-        categories = categoryDao.getAll()
+        // Собираем StateFlow в фоновом потоке
+        coroutineScope.launch {
+            categoryDao.getAll().collect { categoriesList ->
+                // Переключаемся на основной поток для обновления состояния
+                withContext(Dispatchers.Main) {
+                    categories = categoriesList
+                }
+            }
+        }
     }
 
     fun selectCategory(category: Category) {
         selectedCategory = category
-        items = itemDao.getByCategory(category.id)
+        coroutineScope.launch {
+            items = itemDao.getByCategory(category.id)
+        }
     }
 
     fun selectItem(item: Item) {
         selectedItem = item
-        selectedItemFields = getCategoryFields(selectedCategory)
-        selectedItemValues = getItemValues(selectedItem)
-    }
-
-    fun addCategory(newCategory: String, fields: List<String>) {
-        categoryDao.insert(Category(0, newCategory))
-        val category = categoryDao.getByName(newCategory)
-
-        val newCategoryFields = Array(fields.size) { Field(0, category.id, newCategory) }
-
-        fieldDao.insertAll(*newCategoryFields)
-        categories = categoryDao.getAll()
-    }
-
-    fun addItem(newItem: String) {
-        selectedCategory?.let { cat ->
-            val itemId = itemDao.insert(Item(0, cat.id, newItem))
-            val fields = getCategoryFields(selectedCategory)
-            fields.forEach { valueDao.insert(Value(0, itemId, it.id, "")) }
-            items = itemDao.getByCategory(cat.id)
+        runBlocking {
+            launch {
+                selectedItemFields = getCategoryFields(selectedCategory)
+                selectedItemValues = getItemValues(selectedItem)
+            }
         }
     }
 
-    fun getCategoryFields(category: Category?): List<Field> {
-        category?.let { return fieldDao.getByCategory(it.id) }
+    fun addCategory(newCategory: String, fields: List<String>) {
+
+        coroutineScope.launch {
+            val newID = categoryDao.insert(Category(0, newCategory))
+            var category: Category
+            categoryDao.getByName(newCategory).collect { categoryFromDB ->
+                category = categoryFromDB
+            }
+
+            val newCategoryFields = Array(fields.size) { Field(0, newID, newCategory) }
+
+            fieldDao.insertAll(*newCategoryFields)
+            categoryDao.getAll().collect { categoryList ->
+                categories = categoryList
+            }
+        }
+    }
+
+    fun addItem(newItem: String) {
+        coroutineScope.launch {
+            selectedCategory?.let { cat ->
+                val itemId = itemDao.insert(Item(0, cat.id, newItem))
+                val fields = getCategoryFields(selectedCategory)
+                fields.forEach { valueDao.insert(Value(0, itemId, it.id, "")) }
+                items = itemDao.getByCategory(cat.id)
+            }
+        }
+    }
+
+    private fun getCategoryFields(category: Category?): List<Field> {
+
+        category?.let {
+            return fieldDao.getByCategory(it.id)
+        }
         return emptyList()
     }
 
-    fun getItemValues(item: Item?): List<Value> {
-        item?.let { return valueDao.getByItem(it.id) }
+
+    private fun getItemValues(item: Item?): List<Value> {
+        item?.let {
+            return valueDao.getByItem(it.id)
+        }
         return emptyList()
     }
 
     fun deleteCategory() {
-        selectedCategory?.let { categoryDao.delete(it) }
-        categories = categoryDao.getAll()
-        selectedCategory = null
+        val selectedCategoryToDelete = selectedCategory
+        coroutineScope.launch {
+            selectedCategoryToDelete?.let { category ->
+                categoryDao.delete(category)
+                categoryDao.getAll().collect { categoryList ->
+                    categories = categoryList
+                }
+            }
+            selectedCategory = null
+        }
     }
 
     fun deleteItem() {
-        selectedItem?.let { itemDao.delete(it) }
-        items = itemDao.getByCategory(selectedCategory!!.id)
-        selectedItem = null
+        coroutineScope.launch {
+            selectedItem?.let { itemDao.delete(it) }
+            items = itemDao.getByCategory(selectedCategory!!.id)
+            selectedItem = null
+        }
     }
 
     fun saveItemValues(values: List<Value>) {
-        for (value in values) {
-            valueDao.update(value)
+        coroutineScope.launch {
+            for (value in values) {
+                valueDao.update(value)
+            }
+            selectedItemValues = getItemValues(selectedItem)
         }
-        selectedItemValues = getItemValues(selectedItem)
     }
 }

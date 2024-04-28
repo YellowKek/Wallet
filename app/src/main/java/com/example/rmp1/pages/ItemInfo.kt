@@ -22,6 +22,7 @@ import androidx.navigation.NavHostController
 import com.example.rmp1.database.entity.Field
 import com.example.rmp1.database.entity.Item
 import com.example.rmp1.database.entity.Value
+import kotlin.reflect.KFunction1
 
 @Composable
 fun ItemInfo(
@@ -30,7 +31,7 @@ fun ItemInfo(
     item: Item?,
     itemFields: List<Field>,
     itemValues: List<Value>,
-    onSaveItemValues: (List<Value>) -> Unit = {},
+    onSaveItemValues: KFunction1<List<Value>, Unit>,
     onDeleteItem: () -> Unit = {}
 ) {
     item.let {

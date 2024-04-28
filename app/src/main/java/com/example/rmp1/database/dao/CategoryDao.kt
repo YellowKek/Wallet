@@ -6,15 +6,17 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.example.rmp1.database.entity.Category
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 @Dao
 interface CategoryDao {
 
     @Query("select * from categories")
-    fun getAll(): List<Category>
+    fun getAll(): StateFlow<List<Category>>
 
     @Query("select * from categories where name = :name limit 1")
-    fun getByName(name: String): Category
+    fun getByName(name: String): Flow<Category>
 
     @Insert
     fun insert(category: Category)

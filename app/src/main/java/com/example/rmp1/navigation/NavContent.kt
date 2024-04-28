@@ -14,6 +14,7 @@ import com.example.rmp1.pages.CategoryInfo
 import com.example.rmp1.pages.ItemInfo
 import com.example.rmp1.pages.Main
 import com.example.rmp1.pages.NewCategory
+import kotlin.reflect.KFunction1
 
 @Composable
 fun NavContent(
@@ -21,7 +22,7 @@ fun NavContent(
     navController: NavHostController,
     categories: List<Category>,
     onSelectCategory: (Category) -> Unit = {},
-    onSelectItem: (Item) -> Unit = {},
+    onSelectItem: KFunction1<Item, Unit>,
     items: List<Item>,
     selectedCategory: Category?,
     selectedItem: Item?,
@@ -29,8 +30,8 @@ fun NavContent(
     itemValues: List<Value>,
     onDeleteCategory: () -> Unit = {},
     onAddCategory: (String, List<String>) -> Unit,
-    onAddItem: (String) -> Unit = {},
-    onSaveItemValues: (List<Value>) -> Unit = {},
+    onAddItem: KFunction1<String, Unit>,
+    onSaveItemValues: KFunction1<List<Value>, Unit>,
     onDeleteItem: () -> Unit = {}
 ) {
     NavHost(
