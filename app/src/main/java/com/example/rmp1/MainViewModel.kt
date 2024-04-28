@@ -49,7 +49,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         selectedItemValues = getItemValues(selectedItem)
     }
 
-    fun addCategory(newCategory: String, fields: List<String>) {
+    fun addCategory(newCategory: String, fields: List<String>): Boolean {
+        if (categories.any { cat -> cat.name == newCategory }) {
+            return false
+        }
+
         categoryDao.insert(Category(0, newCategory))
         val category = categoryDao.getByName(newCategory)
 
@@ -60,6 +64,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
         fieldDao.insertAll(*newCategoryFields)
         categories = categoryDao.getAll()
+        return true
     }
 
     fun addItem(newItem: String, values: Array<String>): Boolean {

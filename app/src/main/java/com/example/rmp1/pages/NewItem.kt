@@ -7,8 +7,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -18,7 +19,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -89,16 +89,23 @@ fun NewItem(
                             )
                         }
                     }
-                    LazyColumn(modifier = Modifier.padding(20.dp, 0.dp, 0.dp, 0.dp)) {
+                    LazyColumn(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 20.dp)) {
+                        val maxWidth = categoryFields.maxOf { it.name.length }
+
                         itemsIndexed(categoryFields) { index, field ->
                             var newValue by remember { mutableStateOf(itemValues[index]) }
 
-                            Row(modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 10.dp)) {
+                            Row(
+                                modifier = Modifier.padding(bottom = 10.dp),
+                                horizontalArrangement = Arrangement.Absolute.SpaceBetween
+                            ) {
                                 Text(
                                     text = "${field.name}:",
-                                    fontSize = 8.em,
+                                    fontSize = 6.em,
                                     modifier = Modifier
-                                        .padding(0.dp, 10.dp)
+                                        .padding(end = 8.dp)
                                 )
                                 OutlinedTextField(
                                     value = newValue,
@@ -106,10 +113,7 @@ fun NewItem(
                                         newValue = it
                                         itemValues[index] = newValue
                                     },
-                                    placeholder = { Text("Значение") },
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(20.dp, 0.dp, 0.dp, 0.dp)
+                                    placeholder = { Text("Значение") }
                                 )
                             }
                         }
