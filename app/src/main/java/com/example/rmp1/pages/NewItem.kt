@@ -3,12 +3,9 @@ package com.example.rmp1.pages
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.AlertDialog
@@ -22,9 +19,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.navigation.NavHostController
@@ -48,11 +48,44 @@ fun NewItem(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Scaffold(modifier = modifier) {
+        Scaffold(
+            modifier = modifier,
+            bottomBar = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 20.dp),
+                    horizontalArrangement = Arrangement.Absolute.Center
+                ) {
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth(0.4f)
+                            .height(50.dp),
+                        onClick = {
+                            if (newItem.isEmpty()) {
+                                openDialog.value = "Пустое название объекта!"
+                            } else {
+                                val ok = onAddItem(newItem, itemValues)
+                                if (!ok) {
+                                    openDialog.value = "Объект с таким названием уже есть!"
+                                } else {
+                                    navController.popBackStack()
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_add_circle_outline_24),
+                            contentDescription = null
+                        )
+                    }
+                }
+            }
+        ) {
             Column(
                 modifier = Modifier.padding(it),
             ) {
-                Column(modifier = Modifier.fillMaxHeight(0.9f)) {
+                Column {
                     Row(
                         Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
@@ -72,8 +105,8 @@ fun NewItem(
                             onValueChange = { newItem = it },
                             placeholder = { Text("Название") },
                             modifier = Modifier
-                                .weight(1f)
-                                .padding(8.dp, 0.dp, 0.dp, 20.dp)
+                                .fillMaxWidth()
+                                .padding(8.dp, 20.dp)
                         )
                     }
                     if (categoryFields.isNotEmpty()) {
@@ -85,62 +118,55 @@ fun NewItem(
                                 text = "Значения",
                                 fontSize = 9.em,
                                 modifier = Modifier
-                                    .padding(0.dp, 10.dp)
+                                    .padding(bottom = 20.dp)
                             )
                         }
                     }
-                    LazyColumn(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 20.dp)) {
-                        val maxWidth = categoryFields.maxOf { it.name.length }
-
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 20.dp)
+                    ) {
                         itemsIndexed(categoryFields) { index, field ->
                             var newValue by remember { mutableStateOf(itemValues[index]) }
 
                             Row(
                                 modifier = Modifier.padding(bottom = 10.dp),
-                                horizontalArrangement = Arrangement.Absolute.SpaceBetween
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Absolute.Right
                             ) {
-                                Text(
-                                    text = "${field.name}:",
-                                    fontSize = 6.em,
+                                Column(
                                     modifier = Modifier
-                                        .padding(end = 8.dp)
-                                )
-                                OutlinedTextField(
-                                    value = newValue,
-                                    onValueChange = {
-                                        newValue = it
-                                        itemValues[index] = newValue
-                                    },
-                                    placeholder = { Text("Значение") }
-                                )
+                                        .fillMaxWidth(0.25f)
+                                        .padding(end = 8.dp),
+                                    horizontalAlignment = AbsoluteAlignment.Right
+                                ) {
+                                    Text(
+                                        text = "${field.name}:",
+                                        fontSize = 6.em,
+                                    )
+                                }
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(end = 8.dp),
+                                    horizontalAlignment = AbsoluteAlignment.Right
+                                ) {
+                                    OutlinedTextField(
+                                        value = newValue,
+                                        onValueChange = {
+                                            newValue = it
+                                            itemValues[index] = newValue
+                                        },
+                                        textStyle = TextStyle(fontSize = 5.em),
+                                        placeholder = { Text("Значение") },
+                                        modifier = Modifier
+
+                                    )
+                                }
                             }
                         }
                     }
-                }
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth(0.5f)
-                        .height(50.dp)
-                        .align(Alignment.CenterHorizontally),
-                    onClick = {
-                        if (newItem.isEmpty()) {
-                            openDialog.value = "Пустое название объекта!"
-                        } else {
-                            val ok = onAddItem(newItem, itemValues)
-                            if (!ok) {
-                                openDialog.value = "Объект с таким названием уже есть!"
-                            } else {
-                                navController.popBackStack()
-                            }
-                        }
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_add_circle_outline_24),
-                        contentDescription = null
-                    )
                 }
                 if (openDialog.value.isNotEmpty()) {
                     AlertDialog(

@@ -66,7 +66,7 @@ fun CategoryInfo(
                     modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        modifier = Modifier.padding(0.dp, 20.dp),
+                        modifier = Modifier.padding(top = 10.dp, bottom = 20.dp),
                         fontSize = 10.em,
                         text = category.name,
                     )
