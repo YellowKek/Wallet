@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
                         items = mvm.items,
                         selectedCategory = mvm.selectedCategory,
                         selectedItem = mvm.selectedItem,
-                        itemFields = mvm.selectedItemFields,
+                        categoryFields = mvm.selectedCategoryFields,
                         itemValues = mvm.selectedItemValues,
                         onDeleteCategory = mvm::deleteCategory,
                         onAddCategory = mvm::addCategory,

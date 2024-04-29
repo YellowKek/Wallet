@@ -6,15 +6,13 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ItemDao {
 
-    @Query("select * from items")
-    fun getAll(): List<Item>
-
     @Query("select * from items where category_id = :categoryId")
-    fun getByCategory(categoryId: Long): List<Item>
+    fun getByCategory(categoryId: Long): Flow<List<Item>>
 
     @Insert
     fun insert(item: Item): Long

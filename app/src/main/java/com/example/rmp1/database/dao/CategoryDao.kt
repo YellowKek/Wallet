@@ -13,13 +13,13 @@ import kotlinx.coroutines.flow.StateFlow
 interface CategoryDao {
 
     @Query("select * from categories")
-    fun getAll(): StateFlow<List<Category>>
+    fun getAll(): Flow<List<Category>>
 
     @Query("select * from categories where name = :name limit 1")
     fun getByName(name: String): Flow<Category>
 
     @Insert
-    fun insert(category: Category)
+    fun insert(category: Category): Long
 
     @Delete
     fun delete(category: Category)

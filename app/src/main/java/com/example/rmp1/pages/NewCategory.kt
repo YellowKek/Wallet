@@ -25,10 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.rmp1.R
-import com.example.rmp1.database.entity.Field
 
 @Composable
 fun NewCategory(
@@ -36,7 +34,8 @@ fun NewCategory(
     navController: NavHostController,
     onAddCategory: (String, List<String>) -> Unit,
 ) {
-    val openDialog = remember { mutableStateOf(false) }
+    val categoryDialog = remember { mutableStateOf(false) }
+    val fieldDialog = remember { mutableStateOf(false) }
 
     var newCategory by remember { mutableStateOf("") }
     var newFieldName by remember { mutableStateOf("") }
@@ -110,13 +109,13 @@ fun NewCategory(
                     }
                     Button(
                         modifier = Modifier
-                            .fillMaxWidth(0.4f)
+                            .fillMaxWidth(0.5f)
                             .height(50.dp)
                             .align(Alignment.CenterHorizontally),
                         onClick = {
                             if (newFieldName.isNotEmpty()) {
                                 if (newCategoryFields.contains(newFieldName)) {
-                                    openDialog.value = true
+                                    fieldDialog.value = true
                                 } else {
                                     newCategoryFields += newFieldName
                                     newFieldName = ""
@@ -126,13 +125,13 @@ fun NewCategory(
                     ) {
                         Text("Добавить")
                     }
-                    if (openDialog.value) {
+                    if (fieldDialog.value) {
                         AlertDialog(
-                            onDismissRequest = { openDialog.value = false },
+                            onDismissRequest = { fieldDialog.value = false },
                             title = { Text(text = "Ошибка") },
                             text = { Text("Поле с таким названием уже есть") },
                             confirmButton = {
-                                Button({ openDialog.value = false }) {
+                                Button({ fieldDialog.value = false }) {
                                     Text("OK", fontSize = 5.em)
                                 }
                             }
@@ -141,17 +140,33 @@ fun NewCategory(
                 }
                 Button(
                     modifier = Modifier
-                        .fillMaxWidth(0.6f)
-                        .height(60.dp)
+                        .fillMaxWidth(0.5f)
+                        .height(50.dp)
                         .align(Alignment.CenterHorizontally),
                     onClick = {
-                        onAddCategory(newCategory, newCategoryFields)
-                        navController.popBackStack()
+                        if (newCategory.isEmpty()) {
+                            categoryDialog.value = true
+                        } else {
+                            onAddCategory(newCategory, newCategoryFields)
+                            navController.popBackStack()
+                        }
                     }
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_add_circle_outline_24),
                         contentDescription = null
+                    )
+                }
+                if (categoryDialog.value) {
+                    AlertDialog(
+                        onDismissRequest = { categoryDialog.value = false },
+                        title = { Text(text = "Ошибка") },
+                        text = { Text("Пустое название категории!") },
+                        confirmButton = {
+                            Button({ categoryDialog.value = false }) {
+                                Text("OK", fontSize = 5.em)
+                            }
+                        }
                     )
                 }
             }
