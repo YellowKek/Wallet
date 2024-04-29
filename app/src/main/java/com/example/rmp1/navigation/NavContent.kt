@@ -30,7 +30,7 @@ fun NavContent(
     categoryFields: List<Field>,
     itemValues: List<Value>,
     onDeleteCategory: () -> Unit = {},
-    onAddCategory: (String, List<String>) -> Unit,
+    onAddCategory: (String, List<String>) -> Boolean,
     onAddItem: (String, Array<String>) -> Boolean,
     onSaveItemValues: (List<Value>) -> Unit,
     onDeleteItem: () -> Unit = {}

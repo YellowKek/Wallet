@@ -70,6 +70,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+<<<<<<< HEAD
     fun addCategory(newCategory: String, fields: List<String>) {
         coroutineScope.launch {
             val newID = categoryDao.insert(Category(0, newCategory))
@@ -77,12 +78,28 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             for (i in newCategoryFields.indices) {
                 newCategoryFields[i].name = fields[i]
             }
+=======
+    fun addCategory(newCategory: String, fields: List<String>): Boolean {
+        if (categories.any { cat -> cat.name == newCategory }) {
+            return false
+        }
+
+        categoryDao.insert(Category(0, newCategory))
+        val category = categoryDao.getByName(newCategory)
+>>>>>>> dbd07ce930aa6df87eea427febd619dadac11343
 
             fieldDao.insertAll(*newCategoryFields)
             categoryDao.getAll().collect { categoryList ->
                 categories = categoryList
             }
         }
+<<<<<<< HEAD
+=======
+
+        fieldDao.insertAll(*newCategoryFields)
+        categories = categoryDao.getAll()
+        return true
+>>>>>>> dbd07ce930aa6df87eea427febd619dadac11343
     }
 
     fun addItem(newItem: String, values: Array<String>): Boolean {

@@ -32,10 +32,9 @@ import com.example.rmp1.R
 fun NewCategory(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    onAddCategory: (String, List<String>) -> Unit,
+    onAddCategory: (String, List<String>) -> Boolean,
 ) {
-    val categoryDialog = remember { mutableStateOf(false) }
-    val fieldDialog = remember { mutableStateOf(false) }
+    val openDialog = remember { mutableStateOf("") }
 
     var newCategory by remember { mutableStateOf("") }
     var newFieldName by remember { mutableStateOf("") }
@@ -109,13 +108,13 @@ fun NewCategory(
                     }
                     Button(
                         modifier = Modifier
-                            .fillMaxWidth(0.5f)
-                            .height(50.dp)
+                            .fillMaxWidth(0.3f)
+                            .height(40.dp)
                             .align(Alignment.CenterHorizontally),
                         onClick = {
                             if (newFieldName.isNotEmpty()) {
                                 if (newCategoryFields.contains(newFieldName)) {
-                                    fieldDialog.value = true
+                                    openDialog.value = "Поле с таким названием уже есть"
                                 } else {
                                     newCategoryFields += newFieldName
                                     newFieldName = ""
@@ -123,15 +122,18 @@ fun NewCategory(
                             }
                         }
                     ) {
-                        Text("Добавить")
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_add_circle_outline_24),
+                            contentDescription = null
+                        )
                     }
-                    if (fieldDialog.value) {
+                    if (openDialog.value.isNotEmpty()) {
                         AlertDialog(
-                            onDismissRequest = { fieldDialog.value = false },
+                            onDismissRequest = { openDialog.value = "" },
                             title = { Text(text = "Ошибка") },
-                            text = { Text("Поле с таким названием уже есть") },
+                            text = { Text(openDialog.value) },
                             confirmButton = {
-                                Button({ fieldDialog.value = false }) {
+                                Button({ openDialog.value = "" }) {
                                     Text("OK", fontSize = 5.em)
                                 }
                             }
@@ -141,29 +143,30 @@ fun NewCategory(
                 Button(
                     modifier = Modifier
                         .fillMaxWidth(0.5f)
-                        .height(50.dp)
+                        .height(60.dp)
                         .align(Alignment.CenterHorizontally),
                     onClick = {
                         if (newCategory.isEmpty()) {
-                            categoryDialog.value = true
+                            openDialog.value = "Пустое название категории!"
                         } else {
-                            onAddCategory(newCategory, newCategoryFields)
-                            navController.popBackStack()
+                            val ok = onAddCategory(newCategory, newCategoryFields)
+                            if (!ok) {
+                                openDialog.value = "Категория с таким названием уже есть!"
+                            } else {
+                                navController.popBackStack()
+                            }
                         }
                     }
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_add_circle_outline_24),
-                        contentDescription = null
-                    )
+                    Text("Добавить", fontSize = 7.em)
                 }
-                if (categoryDialog.value) {
+                if (openDialog.value.isNotEmpty()) {
                     AlertDialog(
-                        onDismissRequest = { categoryDialog.value = false },
+                        onDismissRequest = { openDialog.value = "" },
                         title = { Text(text = "Ошибка") },
-                        text = { Text("Пустое название категории!") },
+                        text = { Text(openDialog.value) },
                         confirmButton = {
-                            Button({ categoryDialog.value = false }) {
+                            Button({ openDialog.value = "" }) {
                                 Text("OK", fontSize = 5.em)
                             }
                         }
