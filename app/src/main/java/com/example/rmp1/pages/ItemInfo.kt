@@ -135,7 +135,7 @@ fun ValueTextField(value: Value, onValueChange: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(end = 8.dp),
+            .padding(end = 15.dp),
         horizontalAlignment = AbsoluteAlignment.Right
     ) {
         OutlinedTextField(

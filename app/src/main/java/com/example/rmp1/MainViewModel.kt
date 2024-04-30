@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.room.Room
 import com.example.rmp1.database.AppDatabase
 import com.example.rmp1.database.entity.Category
@@ -24,9 +25,6 @@ import kotlinx.coroutines.withContext
 import java.util.Arrays
 
 class MainViewModel(app: Application) : AndroidViewModel(app) {
-
-    private val coroutineScope = CoroutineScope(Dispatchers.IO)
-
     private val db =
         Room.databaseBuilder(app.applicationContext, AppDatabase::class.java, "RMP").build()
 
@@ -47,7 +45,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     var selectedItem by mutableStateOf<Item?>(null)
 
     init {
-        coroutineScope.launch {
+        loadCategories()
+    }
+
+    fun loadCategories() {
+        viewModelScope.launch(Dispatchers.IO) {
             categoryDao.getAll().collect { categoriesList ->
                 withContext(Dispatchers.Main) {
                     categories = categoriesList
@@ -59,7 +61,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun selectCategory(category: Category) {
         selectedCategory = category
         getCategoryFields()
-        coroutineScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             itemDao.getByCategory(category.id).collect { dbItems ->
                 items = dbItems
             }
@@ -68,20 +70,18 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun selectItem(item: Item) {
         selectedItem = item
-        getCategoryFields()
-            getItemValues()
+        getItemValues()
     }
 
     fun addCategory(newCategory: String, fields: List<String>): Boolean {
         if (categories.any { cat -> cat.name == newCategory }) {
             return false
         }
-        coroutineScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val newID = categoryDao.insert(newCategory)
             val newCategoryFields = Array(fields.size) { i -> Field(0, newID, fields[i]) }
 
             newCategoryFields.forEach { field -> fieldDao.insert(field.categoryId, field.name) }
-//            fieldDao.insertAll(*newCategoryFields)
             categoryDao.getAll().collect { categoryList ->
                 categories = categoryList
             }
@@ -95,7 +95,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             return false
         }
 
-        coroutineScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             selectedCategory?.let { cat ->
                 val itemId = itemDao.insert(Item(1, cat.id, newItem))
                 val itemValues = Array(values.size) { i ->
@@ -115,18 +115,17 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun getCategoryFields() {
         selectedCategory?.let { cat ->
-            selectedCategoryFields = emptyList()
-            coroutineScope.launch {
-                fieldDao.getByCategory(cat.id).collect { selectedCategoryFields += it }
+            viewModelScope.launch(Dispatchers.IO) {
+                fieldDao.getByCategory(cat.id).collect { selectedCategoryFields = it }
             }
         }
     }
 
 
     private fun getItemValues() {
-        selectedItem?.let {item ->
-            coroutineScope.launch {
-                selectedItemValues = valueDao.getByItem(item.id).toList()
+        selectedItem?.let { item ->
+            viewModelScope.launch(Dispatchers.IO) {
+                valueDao.getByItem(item.id).collect { selectedItemValues = it }
             }
         }
     }
@@ -135,7 +134,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun deleteCategory() {
         val selectedCategoryToDelete = selectedCategory
 
-        coroutineScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             selectedCategoryToDelete?.let { category ->
                 categoryDao.delete(category)
                 categoryDao.getAll().collect { categoryList ->
@@ -149,7 +148,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun deleteItem() {
         selectedCategory?.let { cat ->
             selectedItem?.let { item ->
-                coroutineScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     itemDao.delete(item)
                     itemDao.getByCategory(cat.id)
                         .collect { dbItems -> items = dbItems }
@@ -160,7 +159,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun saveItemValues(values: List<Value>) {
-        coroutineScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             valueDao.insertAll(*values.toTypedArray())
             getItemValues()
         }

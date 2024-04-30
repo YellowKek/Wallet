@@ -17,7 +17,7 @@ interface ValueDao {
     fun insertAll(vararg values: Value)
 
     @Query("select * from `values` where item_id = :itemId")
-    fun getByItem(itemId: Long): Flow<Value>
+    fun getByItem(itemId: Long): Flow<List<Value>>
 
     @Update
     fun update(value: Value)
