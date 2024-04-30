@@ -13,6 +13,8 @@ import com.example.rmp1.database.entity.Field
 import com.example.rmp1.database.entity.Item
 import com.example.rmp1.database.entity.Value
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -36,6 +38,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     var selectedCategory by mutableStateOf<Category?>(null)
     var selectedItem by mutableStateOf<Item?>(null)
 
+    private var itemsSelector: Job? = null
+    private var fieldsSelector: Job? = null
+    private var valuesSelector: Job? = null
+
     init {
         loadCategories()
     }
@@ -50,20 +56,35 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun selectCategory(category: Category) {
-        selectedCategory = category
-        getCategoryFields()
+    private fun getCategoryItems() {
+        selectedCategory?.let {
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    itemsSelector?.cancelAndJoin()
+                } catch (_: Throwable) {
 
-        viewModelScope.launch(Dispatchers.IO) {
-            itemDao.getByCategory(category.id).collect { dbItems ->
-                items = dbItems
+                }
+
+                itemsSelector = launch {
+                    itemDao.getByCategory(it.id).collect { dbItems ->
+                        items = dbItems
+                    }
+                }
             }
         }
     }
 
+    fun selectCategory(category: Category) {
+        selectedCategory = category
+        getCategoryFields()
+        getCategoryItems()
+    }
+
     fun selectItem(item: Item) {
         selectedItem = item
-        getItemValues()
+        viewModelScope.launch(Dispatchers.IO) {
+            getItemValues()
+        }
     }
 
     fun addCategory(newCategory: String, fields: List<String>): Boolean {
@@ -102,18 +123,29 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
 
     private fun getCategoryFields() {
-        selectedCategory?.let { cat ->
+        selectedCategory?.let {
             viewModelScope.launch(Dispatchers.IO) {
-                fieldDao.getByCategory(cat.id).collect { selectedCategoryFields = it }
+                try {
+                    fieldsSelector?.cancelAndJoin()
+                } catch (_: Throwable) {}
+                fieldsSelector = launch {
+                    fieldDao.getByCategory(it.id).collect { selectedCategoryFields = it }
+                }
             }
         }
     }
 
 
     private fun getItemValues() {
-        selectedItem?.let { item ->
-            viewModelScope.launch(Dispatchers.IO) {
-                valueDao.getByItem(item.id).collect { selectedItemValues = it }
+        viewModelScope.launch(Dispatchers.IO) {
+            selectedItem?.let { item ->
+                try {
+                    valuesSelector?.cancelAndJoin()
+                } catch (_:Throwable) {}
+
+                valuesSelector = launch {
+                    valueDao.getByItem(item.id).collect { selectedItemValues = it }
+                }
             }
         }
     }

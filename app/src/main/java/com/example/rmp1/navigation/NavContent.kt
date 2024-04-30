@@ -22,7 +22,7 @@ fun NavContent(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     categories: List<Category>,
-    onSelectCategory: (Category) -> Unit = {},
+    onSelectCategory: (Category) -> Unit,
     onSelectItem: (Item) -> Unit,
     items: List<Item>,
     selectedCategory: Category?,
