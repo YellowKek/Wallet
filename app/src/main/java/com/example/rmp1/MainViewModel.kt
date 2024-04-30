@@ -81,7 +81,6 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             val newCategoryFields = Array(fields.size) { i -> Field(0, newID, fields[i]) }
 
             newCategoryFields.forEach { field -> fieldDao.insert(field.categoryId, field.name) }
-//            fieldDao.insertAll(*newCategoryFields)
             categoryDao.getAll().collect { categoryList ->
                 categories = categoryList
             }
@@ -162,7 +161,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun saveItemValues(values: List<Value>) {
         coroutineScope.launch {
             valueDao.insertAll(*values.toTypedArray())
-            getItemValues()
+              getItemValues()
         }
     }
 }
