@@ -10,11 +10,8 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ValueDao {
 
-    @Insert
-    fun insert(value: Value)
-
-    @Insert
-    fun insertAll(vararg values: Value)
+    @Query("insert into `values` (item_id, field_id, value) values (:itemId, :fieldId, :value)")
+    fun insert(itemId: Long, fieldId: Long, value: String)
 
     @Query("select * from `values` where item_id = :itemId")
     fun getByItem(itemId: Long): Flow<List<Value>>

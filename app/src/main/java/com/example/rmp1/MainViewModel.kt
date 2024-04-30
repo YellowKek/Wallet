@@ -1,7 +1,6 @@
 package com.example.rmp1
 
 import android.app.Application
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,16 +12,9 @@ import com.example.rmp1.database.entity.Category
 import com.example.rmp1.database.entity.Field
 import com.example.rmp1.database.entity.Item
 import com.example.rmp1.database.entity.Value
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import java.util.Arrays
 
 class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val db =
@@ -48,7 +40,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         loadCategories()
     }
 
-    fun loadCategories() {
+    private fun loadCategories() {
         viewModelScope.launch(Dispatchers.IO) {
             categoryDao.getAll().collect { categoriesList ->
                 withContext(Dispatchers.Main) {
@@ -61,6 +53,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun selectCategory(category: Category) {
         selectedCategory = category
         getCategoryFields()
+
         viewModelScope.launch(Dispatchers.IO) {
             itemDao.getByCategory(category.id).collect { dbItems ->
                 items = dbItems
@@ -97,14 +90,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
         viewModelScope.launch(Dispatchers.IO) {
             selectedCategory?.let { cat ->
-                val itemId = itemDao.insert(Item(1, cat.id, newItem))
-                val itemValues = Array(values.size) { i ->
-                    Value(1, itemId, selectedCategoryFields[i].id, values[i])
-                }
-
-                valueDao.insertAll(*itemValues)
-                itemDao.getByCategory(cat.id).collect { dbItems ->
-                    items = dbItems
+                val itemId = itemDao.insert(cat.id, newItem)
+                for ((index, value) in values.withIndex()) {
+                    valueDao.insert(itemId, selectedCategoryFields[index].id, value)
                 }
             }
         }
@@ -160,8 +148,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun saveItemValues(values: List<Value>) {
         viewModelScope.launch(Dispatchers.IO) {
-            valueDao.insertAll(*values.toTypedArray())
-            getItemValues()
+            for (value in values) {
+                valueDao.insert(value.itemId, value.fieldId, value.value)
+            }
         }
     }
 }

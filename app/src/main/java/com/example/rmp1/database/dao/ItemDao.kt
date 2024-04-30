@@ -14,8 +14,8 @@ interface ItemDao {
     @Query("select * from items where category_id = :categoryId")
     fun getByCategory(categoryId: Long): Flow<List<Item>>
 
-    @Insert
-    fun insert(item: Item): Long
+    @Query("insert into items (category_id, item_name) values (:categoryId, :name)")
+    fun insert(categoryId: Long, name: String): Long
 
     @Delete
     fun delete(item: Item)
