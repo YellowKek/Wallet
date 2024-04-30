@@ -1,7 +1,6 @@
 package com.example.rmp1
 
 import android.app.Application
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,16 +12,11 @@ import com.example.rmp1.database.entity.Category
 import com.example.rmp1.database.entity.Field
 import com.example.rmp1.database.entity.Item
 import com.example.rmp1.database.entity.Value
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import java.util.Arrays
 
 class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val db =
@@ -44,11 +38,15 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     var selectedCategory by mutableStateOf<Category?>(null)
     var selectedItem by mutableStateOf<Item?>(null)
 
+    private var itemsSelector: Job? = null
+    private var fieldsSelector: Job? = null
+    private var valuesSelector: Job? = null
+
     init {
         loadCategories()
     }
 
-    fun loadCategories() {
+    private fun loadCategories() {
         viewModelScope.launch(Dispatchers.IO) {
             categoryDao.getAll().collect { categoriesList ->
                 withContext(Dispatchers.Main) {
@@ -58,10 +56,16 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun selectCategory(category: Category) {
+    suspend fun selectCategory(category: Category) {
         selectedCategory = category
         getCategoryFields()
-        viewModelScope.launch(Dispatchers.IO) {
+        try {
+            itemsSelector?.cancelAndJoin()
+        } catch (_: Throwable) {
+
+        }
+
+        itemsSelector = viewModelScope.launch(Dispatchers.IO) {
             itemDao.getByCategory(category.id).collect { dbItems ->
                 items = dbItems
             }
@@ -70,7 +74,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun selectItem(item: Item) {
         selectedItem = item
-        getItemValues()
+        viewModelScope.launch(Dispatchers.IO) {
+            getItemValues()
+        }
     }
 
     fun addCategory(newCategory: String, fields: List<String>): Boolean {
@@ -113,18 +119,25 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
 
 
-    private fun getCategoryFields() {
-        selectedCategory?.let { cat ->
-            viewModelScope.launch(Dispatchers.IO) {
-                fieldDao.getByCategory(cat.id).collect { selectedCategoryFields = it }
+    private suspend fun getCategoryFields() {
+        selectedCategory?.let {
+            try {
+                fieldsSelector?.cancelAndJoin()
+            } catch (_: Throwable) {}
+            fieldsSelector = viewModelScope.launch(Dispatchers.IO) {
+                fieldDao.getByCategory(it.id).collect { selectedCategoryFields = it }
             }
         }
     }
 
 
-    private fun getItemValues() {
+    private suspend fun getItemValues() {
         selectedItem?.let { item ->
-            viewModelScope.launch(Dispatchers.IO) {
+            try {
+                valuesSelector?.cancelAndJoin()
+            } catch (_:Throwable) {}
+
+            valuesSelector = viewModelScope.launch(Dispatchers.IO) {
                 valueDao.getByItem(item.id).collect { selectedItemValues = it }
             }
         }
