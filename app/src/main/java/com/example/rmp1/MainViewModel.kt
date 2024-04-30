@@ -56,20 +56,28 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    suspend fun selectCategory(category: Category) {
-        selectedCategory = category
-        getCategoryFields()
-        try {
-            itemsSelector?.cancelAndJoin()
-        } catch (_: Throwable) {
+    private fun getCategoryItems() {
+        selectedCategory?.let {
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    itemsSelector?.cancelAndJoin()
+                } catch (_: Throwable) {
 
-        }
+                }
 
-        itemsSelector = viewModelScope.launch(Dispatchers.IO) {
-            itemDao.getByCategory(category.id).collect { dbItems ->
-                items = dbItems
+                itemsSelector = launch {
+                    itemDao.getByCategory(it.id).collect { dbItems ->
+                        items = dbItems
+                    }
+                }
             }
         }
+    }
+
+    fun selectCategory(category: Category) {
+        selectedCategory = category
+        getCategoryFields()
+        getCategoryItems()
     }
 
     fun selectItem(item: Item) {
@@ -119,26 +127,30 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
 
 
-    private suspend fun getCategoryFields() {
+    private fun getCategoryFields() {
         selectedCategory?.let {
-            try {
-                fieldsSelector?.cancelAndJoin()
-            } catch (_: Throwable) {}
-            fieldsSelector = viewModelScope.launch(Dispatchers.IO) {
-                fieldDao.getByCategory(it.id).collect { selectedCategoryFields = it }
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    fieldsSelector?.cancelAndJoin()
+                } catch (_: Throwable) {}
+                fieldsSelector = launch {
+                    fieldDao.getByCategory(it.id).collect { selectedCategoryFields = it }
+                }
             }
         }
     }
 
 
-    private suspend fun getItemValues() {
-        selectedItem?.let { item ->
-            try {
-                valuesSelector?.cancelAndJoin()
-            } catch (_:Throwable) {}
+    private fun getItemValues() {
+        viewModelScope.launch(Dispatchers.IO) {
+            selectedItem?.let { item ->
+                try {
+                    valuesSelector?.cancelAndJoin()
+                } catch (_:Throwable) {}
 
-            valuesSelector = viewModelScope.launch(Dispatchers.IO) {
-                valueDao.getByItem(item.id).collect { selectedItemValues = it }
+                valuesSelector = launch {
+                    valueDao.getByItem(item.id).collect { selectedItemValues = it }
+                }
             }
         }
     }
