@@ -181,7 +181,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun saveItemValues(values: List<Value>) {
         viewModelScope.launch(Dispatchers.IO) {
             for (value in values) {
-                valueDao.insert(value.itemId, value.fieldId, value.value)
+                valueDao.update(value)
             }
         }
     }
