@@ -18,8 +18,8 @@ interface CategoryDao {
     @Query("select * from categories where name = :name limit 1")
     fun getByName(name: String): Flow<Category>
 
-    @Insert
-    fun insert(category: Category): Long
+    @Query("insert into categories (name) values (:name)")
+    fun insert(name: String): Long
 
     @Delete
     fun delete(category: Category)
