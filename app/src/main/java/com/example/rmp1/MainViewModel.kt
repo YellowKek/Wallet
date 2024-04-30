@@ -1,6 +1,7 @@
 package com.example.rmp1
 
 import android.app.Application
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -70,50 +71,35 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-<<<<<<< HEAD
-    fun addCategory(newCategory: String, fields: List<String>) {
-        coroutineScope.launch {
-            val newID = categoryDao.insert(Category(0, newCategory))
-            val newCategoryFields = Array(fields.size) { Field(0, newID, "") }
-            for (i in newCategoryFields.indices) {
-                newCategoryFields[i].name = fields[i]
-            }
-=======
     fun addCategory(newCategory: String, fields: List<String>): Boolean {
         if (categories.any { cat -> cat.name == newCategory }) {
             return false
         }
+        Log.d("newcat", "new fields str: $fields")
 
-        categoryDao.insert(Category(0, newCategory))
-        val category = categoryDao.getByName(newCategory)
->>>>>>> dbd07ce930aa6df87eea427febd619dadac11343
+        coroutineScope.launch {
+            val newID = categoryDao.insert(Category(0, newCategory))
+            val newCategoryFields = Array(fields.size) { i -> Field(0, newID, fields[i]) }
 
             fieldDao.insertAll(*newCategoryFields)
             categoryDao.getAll().collect { categoryList ->
                 categories = categoryList
             }
         }
-<<<<<<< HEAD
-=======
 
-        fieldDao.insertAll(*newCategoryFields)
-        categories = categoryDao.getAll()
         return true
->>>>>>> dbd07ce930aa6df87eea427febd619dadac11343
     }
 
     fun addItem(newItem: String, values: Array<String>): Boolean {
         if (items.any { item -> item.name == newItem }) {
             return false
         }
+
         coroutineScope.launch {
             selectedCategory?.let { cat ->
-
                 val itemId = itemDao.insert(Item(0, cat.id, newItem))
-                val itemValues = Array(values.size) { Value(0, itemId, 0, "") }
-                for (i in itemValues.indices) {
-                    itemValues[i].fieldId = selectedCategoryFields[i].id
-                    itemValues[i].value = values[i]
+                val itemValues = Array(values.size) { i ->
+                    Value(0, itemId, selectedCategoryFields[i].id, values[i])
                 }
 
                 valueDao.insertAll(*itemValues)
@@ -122,20 +108,22 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 }
             }
         }
+
         return true
     }
 
 
     private suspend fun getCategoryFields(category: Category?): List<Field> {
+        var fields = listOf<Field>()
+
         category?.let {
-            var temp: List<Field>
-            temp = ArrayList()
             fieldDao.getByCategory(it.id).collect { dbFields ->
-                temp = dbFields
+                fields = dbFields
             }
-            return temp
         }
-        return emptyList()
+
+        Log.d("newcat", fields.toString())
+        return fields
     }
 
 
@@ -148,6 +136,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun deleteCategory() {
         val selectedCategoryToDelete = selectedCategory
+
         coroutineScope.launch {
             selectedCategoryToDelete?.let { category ->
                 categoryDao.delete(category)
@@ -160,18 +149,21 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun deleteItem() {
-        coroutineScope.launch {
-            selectedItem?.let { itemDao.delete(it) }
-            itemDao.getByCategory(selectedCategory!!.id).collect { dbItems -> items = dbItems }
-            selectedItem = null
+        selectedCategory?.let { cat ->
+            selectedItem?.let { item ->
+                coroutineScope.launch {
+                    itemDao.delete(item)
+                    itemDao.getByCategory(cat.id)
+                        .collect { dbItems -> items = dbItems }
+                }
+                selectedItem = null
+            }
         }
     }
 
     fun saveItemValues(values: List<Value>) {
         coroutineScope.launch {
-            for (value in values) {
-                valueDao.update(value)
-            }
+            valueDao.insertAll(*values.toTypedArray())
             selectedItemValues = getItemValues(selectedItem)
         }
     }
