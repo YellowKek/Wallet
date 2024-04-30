@@ -21,5 +21,5 @@ interface FieldDao {
     fun insert(categoryId: Long, name: String): Long
 
     @Query("select * from fields where category_id = :id")
-    fun getByCategory(id: Long): Flow<Field>
+    fun getByCategory(id: Long): Flow<List<Field>>
 }
